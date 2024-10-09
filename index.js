@@ -1,57 +1,165 @@
 const express = require('express');
-const res = require('express/lib/response');
+const db = require('./db');
 const app = express();
 app.use(express.json());
+const port = 3000;
 
-let personList = [];
+let veiculos = [];
 
-const port = 3002;
+// CREATE TABLE veiculos (
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     marca VARCHAR(50) NOT NULL,
+//     modelo VARCHAR(50) NOT NULL,
+//     ano INT NOT NULL,
+//     cor VARCHAR(30),
+//     preco DECIMAL(10, 2) NOT NULL
+// );
 
-app.get('/visualizar', (req, res) => {
-    const {id} = req.params;
-    res.send(personList);
+// novo veículo
+app.post('/inserir', (req, res) => {
+    const { marca, modelo, ano, cor, proprietario } = req.body;
+    // memória volátil(apenas na memória) => veiculos.push({ id, marca, modelo, ano, cor, proprietario });
+    db.query(
+        `INSERT INTO veiculos (marca, modelo, ano, cor, proprietario) VALUES (?, ?, ?, ?, ?)`,
+        [marca, modelo, Number(ano), cor, proprietario],
+        function (err, results, fields) {
+          if (err) {
+            console.error('Erro na inserção:', err);
+            return;
+          }
+          console.log(results);
+          console.log(fields);
+        }
+      );
+    res.send(`Veículo inserido!\n\nMarca: ${marca} \nModelo: ${modelo} \nAno: ${ano} \nCor: ${cor} \nProprietário: ${proprietario}`);
 });
 
-app.get('/params/:id', (req, res) => {
+// selecionar todos os veículos
+app.get('/veiculos', (req, res) => {
+    db.query(
+      `SELECT * FROM veiculos`,
+      function (err, results, fields) {
+        if (err) {
+          console.error('Erro na consulta:', err);
+          return res.status(500).json({ error: 'Erro ao consultar veículos' });
+        }
+        // Retorna os resultados como um objeto JSON
+        return res.json(results);
+      }
+    );
+  });
+
+// atualizar por ID
+app.put('/atualizar/:id', (req, res) => {
     const { id } = req.params;
-    res.send(id);
+    const { marca, modelo, ano, cor, proprietario } = req.body;
+
+        db.query(
+            `UPDATE veiculos set marca = ?, modelo = ?, ano = ?, cor = ?, propriterio = ? WHERE id = ?`,
+            [marca, modelo, Number(ano), cor, proprietario],
+            function (err, results, fields) {
+              if (err) {
+                console.error('Erro na inserção:', err);
+                return;
+              }
+              console.log(results);
+              console.log(fields);
+            }
+          );
+        res.send(`Veículo inserido!\n\nMarca: ${marca} \nModelo: ${modelo} \nAno: ${ano} \nCor: ${cor} \nProprietário: ${proprietario}`);
+    });
+    
+
+// deletar por ID
+app.delete('/deletar/id/:id', (req, res) => {
+    const { id } = req.params;
+    db.query(
+        `DELET FROM veiculos WHERE id = ?`
+
+        [marca, modelo, Number(ano), cor, proprietario],
+        function (err, results, fields) {
+          if (err) {
+            console.error('Erro na inserção:', err);
+            return;
+          }
+          console.log(results);
+          console.log(fields);
+        }
+      );
+    res.send(`Veículo inserido!\n\nMarca: ${marca} \nModelo: ${modelo} \nAno: ${ano} \nCor: ${cor} \nProprietário: ${proprietario}`);
 });
-
-
-app.post('/cadastrar', (req,res) => {
-    const { marca, modelo, ano, proprietario, cor} = req.body;
-    const id = personList.length;
-    personList.push({marca, modelo, ano, proprietario, cor, id})
-    res.send(`Usuario recebido ${id} ${marca}, ${modelo}, ${ano}, ${proprietario}, ${cor}`)
-});
-
-app.delete('/deletar/:id', (req,res) => {
-    const {id} = req.params;
-    const index = parseInt(id);
-    personList.splice(index, 1);
-    res.send(`Carro deletado ${JSON.stringify(personList)}`)
-  
  
-});
-app.delete('/deletar/:modelo', (req,res) => {
-    const {modelo} = req.params;
-    const index = modelo;
-    personList.splice(index, 1);
-    res.send(`Carro deletado ${JSON.stringify(personList)}`)
-});
+// deletar por modelo
+app.delete('/deletar/modelo/:modelo', (req, res) => {
+    const { modelo } = req.params;
+    const veiculosAntes = veiculos.length; // lenght ver o tamnaho da array
+    db.query(
+        `DELET FROM veiculos WHERE modelo = ?`
 
-app.put('/atualizar/:id', (req,res) =>{
-    const {id} = req.params;
-    const { marca, modelo, ano, proprietario, cor} = req.body;
-    try{
-        personList[id - 1] = {id, marca, modelo, ano, proprietario, cor}
-        res.send(`Carro atualizado ${id} Marca:${marca} Modelo:${modelo} Ano:${ano} Proprietario:${proprietario} Cor:${cor}`);
-    }
-    catch(err){
-        res.send("usuaria nao encontrado")
-    }
+        [marca, modelo, Number(ano), cor, proprietario],
+        function (err, results, fields) {
+          if (err) {
+            console.error('Erro na inserção:', err);
+            return;
+          }
+          console.log(results);
+          console.log(fields);
+        }
+      );
+    res.send(`Veículo inserido!\n\nMarca: ${marca} \nModelo: ${modelo} \nAno: ${ano} \nCor: ${cor} \nProprietário: ${proprietario}`);
 });
+// selecionar por ID
+app.get('/veiculos/:id', (req, res) => {
+    const { id } = req.params;
+    const veiculo = veiculos.find(v => v.id == id); // v recebe v.id igual ao id
+    db.query(
+        `SELECT * FROM veiculos WHERE id = ?`,
+        function (err, results, fields) {
+          if (err) {
+            console.error('Erro na consulta:', err);
+            return res.status(500).json({ error: 'Erro ao consultar veículos' });
+          }
+          // Retorna os resultados como um objeto JSON
+          return res.json(results);
+        }
+      );
+    });
+ 
+// selecionar por ano
+app.get('/veiculos/ano/:ano', (req, res) => {
+    const { ano } = req.params;
+    const veiculosAno = veiculos.filter(v => v.ano == ano);
+
+    db.query(
+        `SELECT * FROM veiculos WHERE ano = ?`,
+        function (err, results, fields) {
+          if (err) {
+            console.error('Erro na consulta:', err);
+            return res.status(500).json({ error: 'Erro ao consultar veículos' });
+          }
+          // Retorna os resultados como um objeto JSON
+          return res.json(results);
+        }
+      );
+    });
+
+// selecionar todos os veículos da cor AZUL
+app.get('/veiculos/cor/azul', (req, res) => {
+    const veiculosAzuis = veiculos.filter(v => v.cor.toLowerCase() === 'azul'); // toLowerCase converte p letra minuscula
+
+    db.query(
+        `SELECT * FROM veiculos WHERE cor = azul`,
+        function (err, results, fields) {
+          if (err) {
+            console.error('Erro na consulta:', err);
+            return res.status(500).json({ error: 'Erro ao consultar veículos' });
+          }
+          // Retorna os resultados como um objeto JSON
+          return res.json(results);
+        }
+      );
+    });
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+    console.log(`Server listening on  http://localhost:${port}`);
 });
