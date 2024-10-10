@@ -2,21 +2,13 @@ const express = require('express');
 const db = require('./db');
 const app = express();
 app.use(express.json());
-const port = 3000;
+const port = 3005;
 
 let veiculos = [];
 
-// CREATE TABLE veiculos (
-//     id INT AUTO_INCREMENT PRIMARY KEY,
-//     marca VARCHAR(50) NOT NULL,
-//     modelo VARCHAR(50) NOT NULL,
-//     ano INT NOT NULL,
-//     cor VARCHAR(30),
-//     preco DECIMAL(10, 2) NOT NULL
-// );
 
 // novo veículo
-app.post('/inserir', (req, res) => {
+app.post('/cadastrar', (req, res) => {
     const { marca, modelo, ano, cor, proprietario } = req.body;
     // memória volátil(apenas na memória) => veiculos.push({ id, marca, modelo, ano, cor, proprietario });
     db.query(
@@ -55,7 +47,7 @@ app.put('/atualizar/:id', (req, res) => {
     const { marca, modelo, ano, cor, proprietario } = req.body;
 
         db.query(
-            `UPDATE veiculos set marca = ?, modelo = ?, ano = ?, cor = ?, propriterio = ? WHERE id = ?`,
+            `UPDATE veiculos SET marca = ?, modelo = ?, ano = ?, cor = ?, propriterio = ? WHERE id = ?`,
             [marca, modelo, Number(ano), cor, proprietario],
             function (err, results, fields) {
               if (err) {
@@ -71,12 +63,12 @@ app.put('/atualizar/:id', (req, res) => {
     
 
 // deletar por ID
-app.delete('/deletar/id/:id', (req, res) => {
+app.delete('/deletar/:id', (req, res) => {
     const { id } = req.params;
+    const { marca, modelo, ano, cor, proprietario } = req.body;
     db.query(
-        `DELET FROM veiculos WHERE id = ?`
-
-        [marca, modelo, Number(ano), cor, proprietario],
+        `DELETE FROM veiculos WHERE id = ?`,
+        [Number(id)],
         function (err, results, fields) {
           if (err) {
             console.error('Erro na inserção:', err);
@@ -84,19 +76,19 @@ app.delete('/deletar/id/:id', (req, res) => {
           }
           console.log(results);
           console.log(fields);
+          res.send(`Veículo inserido!\n\nMarca: ${marca} \nModelo: ${modelo} \nAno: ${ano} \nCor: ${cor} \nProprietário: ${proprietario}`);
         }
       );
-    res.send(`Veículo inserido!\n\nMarca: ${marca} \nModelo: ${modelo} \nAno: ${ano} \nCor: ${cor} \nProprietário: ${proprietario}`);
-});
+    });
  
 // deletar por modelo
 app.delete('/deletar/modelo/:modelo', (req, res) => {
     const { modelo } = req.params;
     const veiculosAntes = veiculos.length; // lenght ver o tamnaho da array
     db.query(
-        `DELET FROM veiculos WHERE modelo = ?`
+        `DELETE FROM veiculos WHERE modelo = ?`,
 
-        [marca, modelo, Number(ano), cor, proprietario],
+        [modelo],
         function (err, results, fields) {
           if (err) {
             console.error('Erro na inserção:', err);
@@ -114,6 +106,7 @@ app.get('/veiculos/:id', (req, res) => {
     const veiculo = veiculos.find(v => v.id == id); // v recebe v.id igual ao id
     db.query(
         `SELECT * FROM veiculos WHERE id = ?`,
+        [Number(id)],
         function (err, results, fields) {
           if (err) {
             console.error('Erro na consulta:', err);
@@ -132,6 +125,7 @@ app.get('/veiculos/ano/:ano', (req, res) => {
 
     db.query(
         `SELECT * FROM veiculos WHERE ano = ?`,
+        [Number(ano)],
         function (err, results, fields) {
           if (err) {
             console.error('Erro na consulta:', err);
@@ -147,8 +141,12 @@ app.get('/veiculos/ano/:ano', (req, res) => {
 app.get('/veiculos/cor/azul', (req, res) => {
     const veiculosAzuis = veiculos.filter(v => v.cor.toLowerCase() === 'azul'); // toLowerCase converte p letra minuscula
 
+      if (veiculosAzuis.length > 0){
+        return res.json(veiculosAzuis);
+
+      }
     db.query(
-        `SELECT * FROM veiculos WHERE cor = azul`,
+        `SELECT * FROM veiculos WHERE cor = 'azul'`,
         function (err, results, fields) {
           if (err) {
             console.error('Erro na consulta:', err);
