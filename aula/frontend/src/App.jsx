@@ -13,6 +13,19 @@ function App() {
     console.log(marca, modelo, ano, cor, proprietario)
   }, [marca, modelo, ano, cor, proprietario])
 
+  useEffect(() => {
+    async function fetchVeiculos() {
+      try {
+        const response = await axios.get('http://localhost:3000/veiculos');
+        setVeiculos(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar veículos:', error);
+      }
+    }
+
+    fetchVeiculos();
+  }, []);
+
 
   //npm i axios
 
@@ -62,5 +75,7 @@ function App() {
     </>
   )
 }
+
+// 5120
 
 export default App
