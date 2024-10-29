@@ -13,7 +13,10 @@ function App() {
     console.log(marca, modelo, ano, cor, proprietario)
   }, [marca, modelo, ano, cor, proprietario])
 
-//npm i axios
+
+  //npm i axios
+
+
   async function registerVehicle(){
     await axios.post("http://localhost:3000/inserir",{
       marca, modelo, ano, cor, proprietario
@@ -23,7 +26,9 @@ function App() {
   function handleSubmit(e){
     e.preventDefault();
     registerVehicle();
-} //no botão de registrar do form, usar essa função
+}
+
+//no botão de registrar do form, usar essa função
 //onClick="() => {handleSubmit}"
 
   return (
@@ -51,9 +56,11 @@ function App() {
           <input type="text" id='proprietario' onChange={(e) => {setProprietario(e.target.value)}}/>
           <br />
           <br />
-          <button type='submit' onClick={handleSubmit}>Registrar veículo</button>
+          <button type='submit' onClick={handleSubmit}>Registrar</button>
        </form>
       </div>
     </>
   )
 }
+
+export default App
