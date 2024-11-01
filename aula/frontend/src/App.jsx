@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import  axios  from 'axios'
 import './App.css'
+import Navbar from './components/Navbar'
 
 function App() {
   const [marca, setMarca] = useState('')
@@ -46,6 +47,8 @@ function App() {
 
   return (
     <>
+    <Navbar>
+    </Navbar>
       <div className="card">
        <form>
           <label htmlFor="marca">Marca</label>
